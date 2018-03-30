@@ -15,16 +15,32 @@ from PyQt5.QtWidgets import (QApplication, QDesktopWidget, QWidget,
 	QGridLayout)
 from PyQt5.QtGui import QIcon, QFont
 from PyQt5 import QtCore
+import MySQLdb
 
 class MainWindow(QMainWindow):
 
 	def __init__(self):
 		super().__init__()
-
+		self.db = MySQLdb.connect(host = "localhost",
+							user = "root",
+							passwd = "test",
+							db = "stocktaking")
 		self.initUI()
 
+
+	def fetchDataToTable(self):
+		c = self.db.cursor()
+		c.execute('select * from records')
+		for idx_r, row in enumerate(c.fetchall()):
+			for idx_c, col in enumerate(row):
+				if (idx_c != 0):
+					self.tableWidget.setItem(idx_r, idx_c-1, QTableWidgetItem(str(col)))
+
+
+
+
 	def initUI(self):
-		self.resize(655,400)
+		self.resize(900,400)
 		self.center()
 		self.setWindowTitle('Stocktaking')
 		self.setWindowIcon(QIcon('images/book.png'))
@@ -71,6 +87,7 @@ class MainWindow(QMainWindow):
 		self.tableWidget.setRowCount(20) #get how many scores in database
 		self.tableWidget.setColumnCount(6)
 		self.tableWidget.setHorizontalHeaderLabels(['Barcode', 'Index', 'Name', 'Catalogue number', 'State', 'Description'])
+		self.fetchDataToTable()
 		self.tableWidget.resizeColumnsToContents()
 
 if __name__ == '__main__':
